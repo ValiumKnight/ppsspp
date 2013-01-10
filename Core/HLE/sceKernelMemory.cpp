@@ -161,15 +161,8 @@ void __KernelMemoryShutdown()
 }
 
 //sceKernelCreateFpl(const char *name, SceUID mpid, SceUint attr, SceSize blocksize, int numBlocks, optparam)
-void sceKernelCreateFpl()
+int sceKernelCreateFpl(const char *name, u32 mpid, u32 attr, u32 blockSize, u32 numBlocks)
 {
-	const char *name = Memory::GetCharPointer(PARAM(0));
-
-	u32 mpid = PARAM(1);
-	u32 attr = PARAM(2);
-	u32 blockSize = PARAM(3);
-	u32 numBlocks = PARAM(4);
-
 	u32 totalSize = blockSize * numBlocks;
 
 	bool atEnd = false;   // attr can change this I think
@@ -179,8 +172,8 @@ void sceKernelCreateFpl()
 	{
 		DEBUG_LOG(HLE,"sceKernelCreateFpl(\"%s\", partition=%i, attr=%i, bsize=%i, nb=%i) FAILED - out of ram", 
 			name, mpid, attr, blockSize, numBlocks);
-		RETURN(SCE_KERNEL_ERROR_NO_MEMORY);
-		return;
+
+		return SCE_KERNEL_ERROR_NO_MEMORY;
 	}
 
 	FPL *fpl = new FPL;
@@ -200,12 +193,11 @@ void sceKernelCreateFpl()
 	DEBUG_LOG(HLE,"%i=sceKernelCreateFpl(\"%s\", partition=%i, attr=%i, bsize=%i, nb=%i)", 
 		id, name, mpid, attr, blockSize, numBlocks);
 
-	RETURN(id);
+	return id;
 }
 
-void sceKernelDeleteFpl()
+u32 sceKernelDeleteFpl(int id)
 {
-	SceUID id = PARAM(0);
 	u32 error;
 	FPL *fpl = kernelObjects.Get<FPL>(id, error);
 	if (fpl)
@@ -216,7 +208,7 @@ void sceKernelDeleteFpl()
 	}
 	else
 	{
-		RETURN(error);
+		return error;
 	}
 }
 
@@ -928,6 +920,8 @@ const HLEFunction SysMemUserForUser[] = {
 	{0xB6D61D02,sceKernelFreePartitionMemory,"sceKernelFreePartitionMemory"},	 //(void *ptr) ?
 	{0x9D9A5BA1,sceKernelGetBlockHeadAddr,"sceKernelGetBlockHeadAddr"},			//(void *ptr) ?
 	{0x13a5abef,sceKernelPrintf,"sceKernelPrintf 0x13a5abef"},
+	{0xC07BB470, WrapI_CUUUU<sceKernelCreateFpl>,"sceKernelCreateFpl"},
+	{0xC07BB470, WrapU_I<sceKernelDeleteFpl>,"sceKernelDeleteFpl"},
 	{0x7591c7db,&WrapV_I<sceKernelSetCompiledSdkVersion>,"sceKernelSetCompiledSdkVersion"},
 	{0x342061E5,&WrapV_I<sceKernelSetCompiledSdkVersion370>,"sceKernelSetCompiledSdkVersion370"},
 	{0x315AD3A0,&WrapV_I<sceKernelSetCompiledSdkVersion380_390>,"sceKernelSetCompiledSdkVersion380_390"},

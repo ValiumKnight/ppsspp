@@ -298,32 +298,27 @@ u32 sceDisplaySetMode(u32 unknown, u32 xres, u32 yres) {
 	return 0;
 }
 
-u32 sceDisplaySetFramebuf() {
-	u32 topaddr = PARAM(0);
-	int linesize = PARAM(1);
-	int pixelformat = PARAM(2);
-	int sync = PARAM(3);
-
+u32 sceDisplaySetFramebuf(u32 topAddress,int lineSize,int pixelFormat,int sync) {
 	FrameBufferState fbstate;
-	DEBUG_LOG(HLE,"sceDisplaySetFramebuf(topaddr=%08x,linesize=%d,pixelsize=%d,sync=%d)",topaddr,linesize,pixelformat,sync);
-	if (topaddr == 0) {
+	DEBUG_LOG(HLE,"sceDisplaySetFramebuf(topAddress=%08x,lineSize=%d,pixelsize=%d,sync=%d)",topAddress,lineSize,pixelFormat,sync);
+	if (topAddress == 0) {
 		DEBUG_LOG(HLE,"- screen off");
 	} else {
-		fbstate.topaddr = topaddr;
-		fbstate.pspFramebufFormat = (PspDisplayPixelFormat)pixelformat;
-		fbstate.pspFramebufLinesize = linesize;
+		fbstate.topaddr = topAddress;
+		fbstate.pspFramebufFormat = (PspDisplayPixelFormat)pixelFormat;
+		fbstate.pspFramebufLinesize = lineSize;
 	}
 
 	if (sync == PSP_DISPLAY_SETBUF_IMMEDIATE) {
 		// Write immediately to the current framebuffer parameters
-		if (topaddr != 0)
+		if (topAddress != 0)
 		{
 			framebuf = fbstate;
 			gpu->SetDisplayFramebuffer(framebuf.topaddr, framebuf.pspFramebufLinesize, framebuf.pspFramebufFormat);
 		}
 		else
-			WARN_LOG(HLE, "%s: PSP_DISPLAY_SETBUF_IMMEDIATE without topaddr?", __FUNCTION__);
-	} else if (topaddr != 0) {
+			WARN_LOG(HLE, "%s: PSP_DISPLAY_SETBUF_IMMEDIATE without topAddress?", __FUNCTION__);
+	} else if (topAddress != 0) {
 		// Delay the write until vblank
 		latchedFramebuf = fbstate;
 		framebufIsLatched = true;
@@ -414,7 +409,7 @@ float sceDisplayGetFramePerSec() {
 
 const HLEFunction sceDisplay[] = {
 	{0x0E20F177,WrapU_UUU<sceDisplaySetMode>, "sceDisplaySetMode"},
-	{0x289D82FE,WrapU_V<sceDisplaySetFramebuf>, "sceDisplaySetFramebuf"},
+	{0x289D82FE,WrapU_UIII<sceDisplaySetFramebuf>, "sceDisplaySetFramebuf"},
 	{0xEEDA2E54,WrapU_UUUI<sceDisplayGetFramebuf>,"sceDisplayGetFrameBuf"},
 	{0x36CDFADE,sceDisplayWaitVblank, "sceDisplayWaitVblank"},
 	{0x984C27E7,sceDisplayWaitVblankStart, "sceDisplayWaitVblankStart"},

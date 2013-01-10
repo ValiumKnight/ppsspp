@@ -487,7 +487,7 @@ u32 sceKernelRegisterSubIntrHandler(u32 intrNumber, u32 subIntrNumber, u32 handl
 
 u32 sceKernelReleaseSubIntrHandler(u32 intrNumber, u32 subIntrNumber)
 {
-	DEBUG_LOG(HLE,"sceKernelReleaseSubIntrHandler(%i, %i)", PARAM(0), PARAM(1));
+	DEBUG_LOG(HLE,"sceKernelReleaseSubIntrHandler(%i, %i)", intrNumber, subIntrNumber);
 
 	if (intrNumber >= PSP_NUMBER_INTERRUPTS)
 		return -1;
